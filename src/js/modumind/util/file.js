@@ -33,7 +33,7 @@ const file = {
       if ('download' in anchor) {
         anchor.style.visibility = 'hidden';
         anchor.href = bloburl;
-        anchor.download = filename;
+        anchor.download = `${filename}.${type}`;
         document.body.appendChild(anchor);
         const evt = document.createEvent('MouseEvents');
         evt.initEvent('click', true, true);

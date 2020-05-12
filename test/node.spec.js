@@ -1,6 +1,6 @@
-import Mindmap from '../src/js/structure/mindmap';
-import Node from '../src/js/structure/node';
-import { Direction } from '../src/js/util';
+import Mindmap from '../src/js/modumind/structure/mindmap';
+import Node from '../src/js/modumind/structure/node';
+import { Direction } from '../src/js/modumind/util';
 
 const rootTest = new Mindmap();
 

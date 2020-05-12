@@ -1,3 +1,3 @@
-import Mindmap from './structure/mindmap';
+import ModuMind from './modumind';
 
-const mindmap = new Mindmap();
+const moduMind = new ModuMind();

@@ -54,10 +54,6 @@ class Mindmap extends Node {
   getMindMap() {
     return JSON.stringify(removeParent(this), null, 2);
   }
-
-  static isNode(node) {
-    return node instanceof Node;
-  }
 }
 
 export default Mindmap;
