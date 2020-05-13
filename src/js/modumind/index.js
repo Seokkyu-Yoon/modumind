@@ -1,5 +1,4 @@
-import Mindmap from './structure/mindmap';
-import Node from './structure/node';
+import MindMap from './structure/mindmap';
 import {
   file, $c, dom, logger,
 } from './util';
@@ -25,9 +24,10 @@ function initFileInput() {
   });
   return fileInput;
 }
+
 class ModuMind {
   constructor() {
-    this.mindmap = new Mindmap();
+    this.mindmap = new MindMap();
     this.fileInput = initFileInput();
   }
 
@@ -36,7 +36,7 @@ class ModuMind {
   }
 
   save(filename = 'modumind') {
-    const strJson = this.mindmap.getMindMap();
+    const strJson = this.mindmap.getJson();
     file.save(strJson, 'json', filename);
   }
 }
