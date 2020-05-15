@@ -1,4 +1,7 @@
-import Mindmap from '../src/js/modumind/structure/mindmap';
+/* eslint-disable quote-props */
+import Mindmap from '../src/js/modumind/model/mindmap';
+import Root from '../src/js/modumind/model/root';
+import Node from '../src/js/modumind/model/node';
 
 import { Direction } from '../src/js/modumind/util';
 
@@ -6,355 +9,195 @@ import { Direction } from '../src/js/modumind/util';
 const mindmap = new Mindmap();
 
 // Root Test
-const testRootId = mindmap.root.id;
+const testRoot = new Root(mindmap.root);
 const answerRoot = {
   isroot: true,
-  id: testRootId,
+  id: testRoot.id,
   parent: null,
   index: 0,
   direction: Direction.CENTER,
   expand: { left: true, right: true },
-  children: mindmap.getNode(testRootId).children,
+  children: {
+    '-1': [],
+    '1': [],
+  },
   title: 'Root Node',
   body: 'Root Node',
 };
 test('Make Root', () => {
-  expect(mindmap.getNode(testRootId)).toEqual(answerRoot);
+  expect(testRoot).toEqual(answerRoot);
 });
 
 // Add Node Default test
-const testNode1Id = mindmap.addNewChild(mindmap.getNode(testRootId)).id;
+const testNode1 = new Node(mindmap.addNewChild(mindmap.root));
 const answerNode1 = {
   isroot: false,
-  id: testNode1Id,
-  parent: mindmap.getNode(testRootId),
+  id: testNode1.id,
+  parent: mindmap.root,
   index: 0,
   direction: Direction.RIGHT,
   expand: true,
-  children: mindmap.getNode(testNode1Id).children,
+  children: [],
   title: 'New Node',
   body: 'New Node',
 };
 
 test('AddNode default (direction must right: 1)', () => {
-  expect(mindmap.getNode(testNode1Id)).toEqual(answerNode1);
+  expect(testNode1).toEqual(answerNode1);
 });
 
 // Add node test with title and body
-const testNode2Id = mindmap.addNewChild(
-  mindmap.getNode(testRootId),
-  { title: 'Node2', body: 'Node2' },
-).id;
+const testNode2 = new Node(mindmap.addNewChild(mindmap.root, { title: 'Node2', body: 'Node2' }));
 const answerNode2 = {
   isroot: false,
-  id: testNode2Id,
-  parent: mindmap.getNode(testRootId),
-  index: 1,
+  id: testNode2.id,
+  parent: mindmap.root,
+  index: 0,
   direction: Direction.LEFT,
   expand: true,
-  children: mindmap.getNode(testNode2Id).children,
+  children: [],
   title: 'Node2',
   body: 'Node2',
 };
 test('AddNode default (direction must left: -1)', () => {
-  expect(mindmap.getNode(testNode2Id)).toEqual(answerNode2);
+  expect(testNode2).toEqual(answerNode2);
 });
 
 // Add node test with title, body and direction
-const testNode3Id = mindmap.addNewChild(
-  mindmap.getNode(testRootId),
-  { direction: Direction.LEFT, title: 'Node3', body: 'Node3' },
-).id;
-const node3 = {
+const testNode3 = new Node(mindmap.addNewChild(mindmap.root, { direction: Direction.LEFT, title: 'Node3', body: 'Node3' }));
+const answerNode3 = {
   isroot: false,
-  id: testNode3Id,
-  parent: mindmap.getNode(testRootId),
-  index: 2,
+  id: testNode3.id,
+  parent: mindmap.root,
+  index: 1,
   direction: Direction.LEFT,
   expand: true,
-  children: mindmap.getNode(testNode3Id).children,
+  children: [],
   title: 'Node3',
   body: 'Node3',
 };
 test('AddNode to left', () => {
-  expect(mindmap.getNode(testNode3Id)).toEqual(node3);
+  expect(testNode3).toEqual(answerNode3);
 });
 
 // Parsing test
-const mindmapJson = `{
-  "isroot": true,
-  "id": "${testRootId}",
-  "index": 0,
-  "direction": 0,
-  "expand": {
-    "left": true,
-    "right": true
+const mindmapJson = {
+  isroot: true,
+  id: testRoot.id,
+  index: 0,
+  direction: Direction.CENTER,
+  expand: {
+    left: true,
+    right: true,
   },
-  "title": "Root Node",
-  "body": "Root Node",
-  "children": [
-    {
-      "isroot": false,
-      "id": "${testNode1Id}",
-      "index": 0,
-      "direction": 1,
-      "expand": true,
-      "title": "New Node",
-      "body": "New Node",
-      "children": []
-    },
-    {
-      "isroot": false,
-      "id": "${testNode2Id}",
-      "index": 1,
-      "direction": -1,
-      "expand": true,
-      "title": "Node2",
-      "body": "Node2",
-      "children": []
-    },
-    {
-      "isroot": false,
-      "id": "${testNode3Id}",
-      "index": 2,
-      "direction": -1,
-      "expand": true,
-      "title": "Node3",
-      "body": "Node3",
-      "children": []
-    }
-  ]
-}`;
+  title: 'Root Node',
+  body: 'Root Node',
+  children: {
+    '-1': [
+      {
+        isroot: false,
+        id: `${testNode2.id}`,
+        index: 0,
+        direction: Direction.LEFT,
+        expand: true,
+        title: 'Node2',
+        body: 'Node2',
+        children: [],
+      },
+      {
+        isroot: false,
+        id: `${testNode3.id}`,
+        index: 1,
+        direction: Direction.LEFT,
+        expand: true,
+        title: 'Node3',
+        body: 'Node3',
+        children: [],
+      },
+    ],
+    '1': [
+      {
+        isroot: false,
+        id: `${testNode1.id}`,
+        index: 0,
+        direction: Direction.RIGHT,
+        expand: true,
+        title: 'New Node',
+        body: 'New Node',
+        children: [],
+      },
+    ],
+  },
+};
 test('Mindmap to JSON', () => {
-  expect(mindmap.getJson()).toBe(mindmapJson);
+  expect(mindmap.getJson()).toEqual(mindmapJson);
 });
 test('JSON to Mindmap', () => {
-  expect(new Mindmap(JSON.parse(mindmapJson))).toEqual(mindmap);
+  expect(new Mindmap(mindmapJson)).toEqual(mindmap);
 });
 
 // move test
-const movedRoot1 = {
+const answerMove1 = {
   isroot: true,
-  id: `${testRootId}`,
+  id: testRoot.id,
   index: 0,
-  direction: 0,
+  direction: Direction.CENTER,
   expand: {
     left: true,
     right: true,
   },
   title: 'Root Node',
   body: 'Root Node',
-  children: [
-    {
-      isroot: false,
-      id: `${testNode2Id}`,
-      index: 0,
-      direction: -1,
-      expand: true,
-      title: 'Node2',
-      body: 'Node2',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode1Id}`,
-      index: 1,
-      direction: -1,
-      expand: true,
-      title: 'New Node',
-      body: 'New Node',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode3Id}`,
-      index: 2,
-      direction: -1,
-      expand: true,
-      title: 'Node3',
-      body: 'Node3',
-      children: [],
-    },
-  ],
-};
-const movedRoot2 = {
-  isroot: true,
-  id: `${testRootId}`,
-  index: 0,
-  direction: 0,
-  expand: {
-    left: true,
-    right: true,
+  children: {
+    '-1': [
+      {
+        isroot: false,
+        id: testNode2.id,
+        index: 0,
+        direction: Direction.LEFT,
+        expand: true,
+        title: 'Node2',
+        body: 'Node2',
+        children: [],
+      },
+      {
+        isroot: false,
+        id: testNode1.id,
+        index: 1,
+        direction: Direction.LEFT,
+        expand: true,
+        title: 'New Node',
+        body: 'New Node',
+        children: [],
+      },
+      {
+        isroot: false,
+        id: testNode3.id,
+        index: 2,
+        direction: Direction.LEFT,
+        expand: true,
+        title: 'Node3',
+        body: 'Node3',
+        children: [],
+      },
+    ],
+    '1': [],
   },
-  title: 'Root Node',
-  body: 'Root Node',
-  children: [
-    {
-      isroot: false,
-      id: `${testNode1Id}`,
-      index: 0,
-      direction: -1,
-      expand: true,
-      title: 'New Node',
-      body: 'New Node',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode2Id}`,
-      index: 1,
-      direction: -1,
-      expand: true,
-      title: 'Node2',
-      body: 'Node2',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode3Id}`,
-      index: 2,
-      direction: -1,
-      expand: true,
-      title: 'Node3',
-      body: 'Node3',
-      children: [],
-    },
-  ],
 };
-const movedRoot3 = {
-  isroot: true,
-  id: `${testRootId}`,
-  index: 0,
-  direction: 0,
-  expand: {
-    left: true,
-    right: true,
-  },
-  title: 'Root Node',
-  body: 'Root Node',
-  children: [
-    {
-      isroot: false,
-      id: `${testNode2Id}`,
-      index: 0,
-      direction: -1,
-      expand: true,
-      title: 'Node2',
-      body: 'Node2',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode3Id}`,
-      index: 1,
-      direction: -1,
-      expand: true,
-      title: 'Node3',
-      body: 'Node3',
-      children: [],
-    },
-    {
-      isroot: false,
-      id: `${testNode1Id}`,
-      index: 2,
-      direction: -1,
-      expand: true,
-      title: 'New Node',
-      body: 'New Node',
-      children: [],
-    },
-  ],
-};
-const movedRoot4 = {
-  isroot: true,
-  id: `${testRootId}`,
-  index: 0,
-  direction: 0,
-  expand: {
-    left: true,
-    right: true,
-  },
-  title: 'Root Node',
-  body: 'Root Node',
-  children: [
-    {
-      isroot: false,
-      id: `${testNode2Id}`,
-      index: 0,
-      direction: -1,
-      expand: true,
-      title: 'Node2',
-      body: 'Node2',
-      children: [
-        {
-          isroot: false,
-          id: `${testNode3Id}`,
-          index: 0,
-          direction: -1,
-          expand: true,
-          title: 'Node3',
-          body: 'Node3',
-          children: [],
-        },
-      ],
-    },
-    {
-      isroot: false,
-      id: `${testNode1Id}`,
-      index: 1,
-      direction: -1,
-      expand: true,
-      title: 'New Node',
-      body: 'New Node',
-      children: [],
-    },
-  ],
-};
-
 test('MoveNode node1 between node2 and node3', () => {
-  mindmap.moveNode(
-    mindmap.getNode(testRootId),
-    mindmap.getNode(testNode1Id),
-    mindmap.getNode(testNode2Id),
-    mindmap.getNode(testNode3Id),
-  );
-  expect(mindmap).toEqual(new Mindmap(movedRoot1));
-});
-test('MoveNode node1 before node2', () => {
-  mindmap.moveNode(
-    mindmap.getNode(testRootId),
-    mindmap.getNode(testNode1Id),
-    null,
-    mindmap.getNode(testNode2Id),
-  );
-  expect(mindmap).toEqual(new Mindmap(movedRoot2));
-});
-test('MoveNode node1 after node3', () => {
-  mindmap.moveNode(
-    mindmap.getNode(testRootId),
-    mindmap.getNode(testNode1Id),
-    mindmap.getNode(testNode3Id),
-    null,
-  );
-  expect(mindmap).toEqual(new Mindmap(movedRoot3));
+  const root = mindmap.getNode(testRoot.id);
+  const node1 = mindmap.getNode(testNode1.id);
+  const node2 = mindmap.getNode(testNode2.id);
+  const node3 = mindmap.getNode(testNode3.id);
+  mindmap.moveNode(root, node1, node2, node3);
+  expect(mindmap).toEqual(new Mindmap(answerMove1));
 });
 
-test('MoveNode node3 to child of node2', () => {
-  mindmap.moveNode(
-    mindmap.getNode(testNode2Id),
-    mindmap.getNode(testNode3Id),
-    null,
-    null,
-  );
-  expect(mindmap).toEqual(new Mindmap(movedRoot4));
-});
-
-// remove test
-const removeNode1 = {
+const answerMove2 = {
   isroot: true,
-  id: `${testRootId}`,
+  id: testRoot.id,
   index: 0,
-  direction: 0,
+  direction: Direction.CENTER,
   expand: {
     left: true,
     right: true,
@@ -364,45 +207,208 @@ const removeNode1 = {
   children: [
     {
       isroot: false,
-      id: `${testNode2Id}`,
+      id: testNode1.id,
       index: 0,
-      direction: -1,
+      direction: Direction.LEFT,
+      expand: true,
+      title: 'New Node',
+      body: 'New Node',
+      children: [],
+    },
+    {
+      isroot: false,
+      id: testNode2.id,
+      index: 1,
+      direction: Direction.LEFT,
       expand: true,
       title: 'Node2',
       body: 'Node2',
-      children: [
-        {
-          isroot: false,
-          id: `${testNode3Id}`,
-          index: 0,
-          direction: -1,
-          expand: true,
-          title: 'Node3',
-          body: 'Node3',
-          children: [],
-        },
-      ],
+      children: [],
+    },
+    {
+      isroot: false,
+      id: testNode3.id,
+      index: 2,
+      direction: Direction.LEFT,
+      expand: true,
+      title: 'Node3',
+      body: 'Node3',
+      children: [],
     },
   ],
 };
-const removeNode2 = {
-  isroot: true,
-  id: `${testRootId}`,
-  index: 0,
-  direction: 0,
-  expand: {
-    left: true,
-    right: true,
-  },
-  title: 'Root Node',
-  body: 'Root Node',
-  children: [],
-};
-test('Remove node1', () => {
-  mindmap.removeNode(mindmap.getNode(testNode1Id));
-  expect(mindmap).toEqual(new Mindmap(removeNode1));
+test('MoveNode node1 before node2', () => {
+  const root = mindmap.getNode(testRoot.id);
+  const node1 = mindmap.getNode(testNode1.id);
+  const node2 = mindmap.getNode(testNode2.id);
+  mindmap.moveNode(root, node1, null, node2);
+  expect(mindmap).toEqual(new Mindmap(answerMove2));
 });
-test('Remove node2', () => {
-  mindmap.removeNode(mindmap.getNode(testNode2Id));
-  expect(mindmap).toEqual(new Mindmap(removeNode2));
-});
+
+// const movedRoot3 = {
+//   isroot: true,
+//   id: `${testRootId}`,
+//   index: 0,
+//   direction: 0,
+//   expand: {
+//     left: true,
+//     right: true,
+//   },
+//   title: 'Root Node',
+//   body: 'Root Node',
+//   children: [
+//     {
+//       isroot: false,
+//       id: `${testNode2Id}`,
+//       index: 0,
+//       direction: -1,
+//       expand: true,
+//       title: 'Node2',
+//       body: 'Node2',
+//       children: [],
+//     },
+//     {
+//       isroot: false,
+//       id: `${testNode3Id}`,
+//       index: 1,
+//       direction: -1,
+//       expand: true,
+//       title: 'Node3',
+//       body: 'Node3',
+//       children: [],
+//     },
+//     {
+//       isroot: false,
+//       id: `${testNode1Id}`,
+//       index: 2,
+//       direction: -1,
+//       expand: true,
+//       title: 'New Node',
+//       body: 'New Node',
+//       children: [],
+//     },
+//   ],
+// };
+// const movedRoot4 = {
+//   isroot: true,
+//   id: `${testRootId}`,
+//   index: 0,
+//   direction: 0,
+//   expand: {
+//     left: true,
+//     right: true,
+//   },
+//   title: 'Root Node',
+//   body: 'Root Node',
+//   children: [
+//     {
+//       isroot: false,
+//       id: `${testNode2Id}`,
+//       index: 0,
+//       direction: -1,
+//       expand: true,
+//       title: 'Node2',
+//       body: 'Node2',
+//       children: [
+//         {
+//           isroot: false,
+//           id: `${testNode3Id}`,
+//           index: 0,
+//           direction: -1,
+//           expand: true,
+//           title: 'Node3',
+//           body: 'Node3',
+//           children: [],
+//         },
+//       ],
+//     },
+//     {
+//       isroot: false,
+//       id: `${testNode1Id}`,
+//       index: 1,
+//       direction: -1,
+//       expand: true,
+//       title: 'New Node',
+//       body: 'New Node',
+//       children: [],
+//     },
+//   ],
+// };
+
+// test('MoveNode node1 after node3', () => {
+//   mindmap.moveNode(
+//     mindmap.getNode(testRootId),
+//     mindmap.getNode(testNode1Id),
+//     mindmap.getNode(testNode3Id),
+//     null,
+//   );
+//   expect(mindmap).toEqual(new Mindmap(movedRoot3));
+// });
+
+// test('MoveNode node3 to child of node2', () => {
+//   mindmap.moveNode(
+//     mindmap.getNode(testNode2Id),
+//     mindmap.getNode(testNode3Id),
+//     null,
+//     null,
+//   );
+//   expect(mindmap).toEqual(new Mindmap(movedRoot4));
+// });
+
+// // remove test
+// const removeNode1 = {
+//   isroot: true,
+//   id: `${testRootId}`,
+//   index: 0,
+//   direction: 0,
+//   expand: {
+//     left: true,
+//     right: true,
+//   },
+//   title: 'Root Node',
+//   body: 'Root Node',
+//   children: [
+//     {
+//       isroot: false,
+//       id: `${testNode2Id}`,
+//       index: 0,
+//       direction: -1,
+//       expand: true,
+//       title: 'Node2',
+//       body: 'Node2',
+//       children: [
+//         {
+//           isroot: false,
+//           id: `${testNode3Id}`,
+//           index: 0,
+//           direction: -1,
+//           expand: true,
+//           title: 'Node3',
+//           body: 'Node3',
+//           children: [],
+//         },
+//       ],
+//     },
+//   ],
+// };
+// const removeNode2 = {
+//   isroot: true,
+//   id: `${testRootId}`,
+//   index: 0,
+//   direction: 0,
+//   expand: {
+//     left: true,
+//     right: true,
+//   },
+//   title: 'Root Node',
+//   body: 'Root Node',
+//   children: [],
+// };
+// test('Remove node1', () => {
+//   mindmap.removeNode(mindmap.getNode(testNode1Id));
+//   expect(mindmap).toEqual(new Mindmap(removeNode1));
+// });
+// test('Remove node2', () => {
+//   mindmap.removeNode(mindmap.getNode(testNode2Id));
+//   expect(mindmap).toEqual(new Mindmap(removeNode2));
+// });

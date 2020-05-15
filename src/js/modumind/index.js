@@ -1,7 +1,22 @@
-import MindMap from './structure/mindmap';
+import Panzoom from '@panzoom/panzoom';
+import MindmapModel from './model/mindmap';
+import MindmapView from './view/mindmap';
+
 import {
-  file, $c, dom, logger,
+  file,
+  $c,
+  dom,
+  logger,
+  $d,
+  $g,
+  $w,
 } from './util';
+
+const DEFAULT_OPTIONS = {
+  viewport: 'viewport',
+  editable: true,
+  theme: null,
+};
 
 function initFileInput() {
   const fileInput = $c('input');
@@ -11,10 +26,9 @@ function initFileInput() {
     if (files.length > 0) {
       const fileData = files[0];
       file.read(fileData, (modumindData) => {
-        const modumind = JSON.parse(modumindData);
-        if (modumind) {
-          this.mindmap.show(modumind, true);
-        } else {
+        try {
+          this.model = new MindmapModel(JSON.parse(modumindData));
+        } catch (e) {
           logger.error('can not open this file as mindmap');
         }
       });
@@ -26,9 +40,45 @@ function initFileInput() {
 }
 
 class ModuMind {
-  constructor() {
-    this.mindmap = new MindMap();
-    this.fileInput = initFileInput();
+  constructor(options) {
+    this.fileInput = initFileInput.call(this);
+
+    this.option = {
+      ...DEFAULT_OPTIONS,
+      ...options,
+    };
+
+    this.model = new MindmapModel();
+    this.view = new MindmapView();
+
+    this.viewport = $g(this.option.viewport);
+    this.container = $c('modumind-container');
+    this.container.innerHTML = '';
+
+    this.viewport.appendChild(this.container);
+    this.container.appendChild(this.view);
+
+    this.init();
+  }
+
+  resize() {
+    $d.body.style.margin = '0px';
+    $d.body.style.overflow = 'hidden';
+    $d.body.style.height = `${$w.innerHeight}px`;
+    this.viewport.style.width = `${$d.body.clientWidth}px`;
+    this.viewport.style.height = `${$d.body.clientHeight}px`;
+  }
+
+  init() {
+    $w.addEventListener('resize', this.resize.bind(this));
+    this.resize();
+    this.addNode(this.model.root);
+  }
+
+  addNode(node) {
+    this.view.addNode(node);
+    node.getChildren().forEach((child) => this.view.addNode(child));
+    this.view.draw(this.model.root);
   }
 
   load() {
@@ -36,8 +86,8 @@ class ModuMind {
   }
 
   save(filename = 'modumind') {
-    const strJson = this.mindmap.getJson();
-    file.save(strJson, 'json', filename);
+    const mindmap = this.model.getJson();
+    file.save({ option: this.option, mindmap }, 'json', filename);
   }
 }
 

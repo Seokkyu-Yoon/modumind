@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+node {
+  display: block;
+  position: absolute;
+  border: darkgray solid 2px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+mindmap {
+  display: block;
+  overflow: visible;
+  background-color: cyan;
+}
+
+#viewport {
+  display: block;
+  overflow: hidden;
+}
+
+modumind-container{
+  display: block;
+  overflow: hidden;
+}

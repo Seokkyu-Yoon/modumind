@@ -1,12 +1,27 @@
 import Root from './root';
 import Node from './node';
-import { logger } from '../util';
+import { logger, Direction } from '../util';
 
 /**
  * This function need to remove circular
  * @param {Node} node
  */
 function removeParent(node) {
+  if (node.isroot) {
+    const children = {};
+    children[Direction.LEFT] = node.children[Direction.LEFT].map(removeParent);
+    children[Direction.RIGHT] = node.children[Direction.RIGHT].map(removeParent);
+    return {
+      isroot: node.isroot,
+      id: node.id,
+      index: node.index,
+      direction: node.direction,
+      expand: node.expand,
+      title: node.title,
+      body: node.body,
+      children,
+    };
+  }
   return {
     isroot: node.isroot,
     id: node.id,
@@ -36,7 +51,14 @@ class Mindmap {
       return false;
     }
     this.nodes[node.id] = node;
-    return !node.children.some((child) => !this.initNodes(child));
+    let { children } = node;
+    if (node.isroot) {
+      children = [
+        ...children[Direction.LEFT],
+        ...children[Direction.RIGHT],
+      ];
+    }
+    return !children.some((child) => !this.initNodes(child));
   }
 
   getNode(node) {
@@ -54,6 +76,7 @@ class Mindmap {
     if (this.getNode(newNode) !== null) {
       return this.addNewChild(parent, node, index);
     }
+    parent.addChild(newNode);
     this.nodes[newNode.id] = newNode;
     return newNode;
   }
@@ -63,7 +86,7 @@ class Mindmap {
       logger.warn("Can't move root node");
       return null;
     }
-    srcNode.remove();
+    srcNode.removeToParent();
     let index;
     if (beforeNode === null) {
       index = 0;
@@ -85,6 +108,7 @@ class Mindmap {
       index,
       direction: nodeDirection,
     });
+    parent.addChild(movedNode);
     this.nodes[movedNode.id] = movedNode;
 
     return movedNode;
@@ -95,7 +119,7 @@ class Mindmap {
       logger.warn("Can't remove root node");
       return;
     }
-    srcNode.remove();
+    srcNode.removeToParent();
     const removeNodes = [srcNode, ...srcNode.getChildren()];
     this.nodes = Object.keys(this.nodes).reduce((bucket, nodeId) => {
       if (removeNodes.includes(this.nodes[nodeId])) return bucket;
@@ -109,7 +133,7 @@ class Mindmap {
   }
 
   getJson() {
-    return JSON.stringify(removeParent(this.root), null, 2);
+    return removeParent(this.root);
   }
 }
 
