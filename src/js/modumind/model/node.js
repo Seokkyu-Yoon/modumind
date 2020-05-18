@@ -1,4 +1,4 @@
-import { uuid, Direction } from '../util';
+import { uuid, Direction, logger } from '../util';
 
 class Node {
   constructor({
@@ -26,27 +26,15 @@ class Node {
   }
 
   initChildren(children) {
-    if (this.isroot) {
-      const rootChildren = {};
-      rootChildren[Direction.LEFT] = children[Direction.LEFT]
-        .map((child) => new Node({ ...child, parent: this }));
-      rootChildren[Direction.RIGHT] = children[Direction.RIGHT]
-        .map((child) => new Node({ ...child, parent: this }));
-      this.children = rootChildren;
-    } else {
-      this.children = children.map((child) => new Node({ ...child, parent: this }));
-    }
+    this.children = children.map((child) => new Node({ ...child, parent: this }));
   }
 
   addChild(child) {
-    let { children } = this;
-    if (this.isroot) {
-      children = this.children[child.direction];
-    }
-
-    children.splice(child.index, 0, child);
-    for (let { index } = child; index < children.length; index += 1) {
-      Object.assign(children[index], { index });
+    const { children } = this;
+    const { index } = child;
+    children.splice(index, 0, child);
+    for (let i = index; i < children.length; i += 1) {
+      Object.assign(children[i], { index: i });
     }
   }
 
@@ -69,41 +57,28 @@ class Node {
     return Direction.RIGHT;
   }
 
-  getChildren(direction) {
-    let { children } = this;
-    if (this.isroot) {
-      if (typeof direction !== 'undefined') {
-        children = this.children[direction];
-      } else {
-        children = [
-          ...this.children[Direction.LEFT],
-          ...this.children[Direction.RIGHT],
-        ];
-      }
-    }
-    return children.reduce((bucket, child) => [
-      child,
-      ...bucket,
-      ...child.getChildren(direction),
-    ], []);
+  getChildren() {
+    return this.children;
   }
 
-  removeToParent() {
-    if (this.parent.isroot) {
-      this.parent.children[this.direction].splice(this.index, 1);
-      for (let { index } = this; index < this.parent.children[this.direction].length; index += 1) {
-        Object.assign(this.parent.children[this.direction][index], { index });
-      }
+  removeChild(node) {
+    const { children } = this;
+    const { index } = node;
+    children.splice(index, 1);
+    for (let i = index; i < children.length; i += 1) {
+      Object.assign(children[i], { index: i });
+    }
+  }
+
+  removeFromParent() {
+    if (this.isroot) {
+      logger.warn('root node doesn\'t have parent');
       return;
     }
-    this.parent.children.splice(this.index, 1);
-    for (let { index } = this; index < this.parent.children.length; index += 1) {
-      Object.assign(this.parent.children[index], { index });
-    }
+    this.parent.removeChild(this);
   }
 
   hasChildren(node) {
-    if (this.isroot) return this.children[node.direction].includes(node);
     return this.children.includes(node);
   }
 

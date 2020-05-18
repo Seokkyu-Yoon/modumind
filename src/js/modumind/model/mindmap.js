@@ -86,7 +86,7 @@ class Mindmap {
       logger.warn("Can't move root node");
       return null;
     }
-    srcNode.removeToParent();
+    srcNode.removeFromParent();
     let index;
     if (beforeNode === null) {
       index = 0;
@@ -119,7 +119,7 @@ class Mindmap {
       logger.warn("Can't remove root node");
       return;
     }
-    srcNode.removeToParent();
+    srcNode.removeFromParent();
     const removeNodes = [srcNode, ...srcNode.getChildren()];
     this.nodes = Object.keys(this.nodes).reduce((bucket, nodeId) => {
       if (removeNodes.includes(this.nodes[nodeId])) return bucket;
