@@ -1,16 +1,16 @@
 import Root from './root';
 import Node from './node';
 import { logger, Direction } from '../util';
-
+import eventHandler, { EventType } from '../event-handler';
 /**
  * This function need to remove circular
  * @param {Node} node
  */
-function removeParent(node) {
+function removeCircular(node) {
   if (node.isroot) {
     const children = {};
-    children[Direction.LEFT] = node.children[Direction.LEFT].map(removeParent);
-    children[Direction.RIGHT] = node.children[Direction.RIGHT].map(removeParent);
+    children[Direction.LEFT] = node.children[Direction.LEFT].map(removeCircular);
+    children[Direction.RIGHT] = node.children[Direction.RIGHT].map(removeCircular);
     return {
       isroot: node.isroot,
       id: node.id,
@@ -30,7 +30,7 @@ function removeParent(node) {
     expand: node.expand,
     title: node.title,
     body: node.body,
-    children: node.children.map(removeParent),
+    children: node.children.map(removeCircular),
   };
 }
 
@@ -43,6 +43,13 @@ class Mindmap {
       logger.warn('Fail to init nodes');
       return null;
     }
+
+    eventHandler.addEvent((type, data) => {
+      if (type === EventType.ADD) {
+        if (!data.parent) return;
+        this.addNewChild.call(this, data.parent, data.node, data.index);
+      }
+    });
   }
 
   initNodes(node) {
@@ -73,9 +80,6 @@ class Mindmap {
 
   addNewChild(parent, node = {}, index = -1) {
     const newNode = new Node({ ...node, parent, index });
-    if (this.getNode(newNode) !== null) {
-      return this.addNewChild(parent, node, index);
-    }
     parent.addChild(newNode);
     this.nodes[newNode.id] = newNode;
     return newNode;
@@ -133,7 +137,8 @@ class Mindmap {
   }
 
   getJson() {
-    return removeParent(this.root);
+    const json = removeCircular(this.root);
+    return JSON.stringify(json, null, 2);
   }
 }
 

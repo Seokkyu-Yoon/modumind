@@ -42,7 +42,7 @@ function Node(nodeModel) {
   if (nodeModel.direction !== Direction.LEFT) {
     nodeEl.appendChild(expander[Direction.RIGHT]);
   }
-
+  Object.assign(nodeModel);
   return nodeEl;
 }
 

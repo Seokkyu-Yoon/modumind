@@ -5,6 +5,7 @@ import {
   Direction,
 } from '../util';
 import Node from './node';
+import eventHandler, { EventType } from '../event-handler';
 
 const MARGIN = {
   HORIZONTAL: 50,
@@ -64,7 +65,7 @@ function drawChild(node, parent) {
   node.children.forEach((child) => drawChild(child, parent));
 }
 
-function draw({ root }) {
+function show(root) {
   setHeight(root);
   const rootEl = $g(root.id);
   rootEl.style.left = `${($d.body.offsetWidth - rootEl.offsetWidth) / 2}px`;
@@ -73,16 +74,27 @@ function draw({ root }) {
   root.getChildren().forEach((child) => drawChild(child, root));
 }
 
-function addNode(node) {
-  const nodeEl = new Node(node);
-  this.appendChild(nodeEl);
-  return nodeEl;
+function addNode(mindmap, node) {
+  if ($g(node.id) === null) {
+    const nodeEl = new Node(node);
+    mindmap.appendChild(nodeEl);
+  }
+  node.getChildren().forEach((child) => addNode(mindmap, child));
 }
 
 function Mindmap() {
   const mindmap = $c('mindmap');
-  mindmap.draw = draw;
-  mindmap.addNode = addNode;
+  eventHandler.addEvent((type, data) => {
+    if (type === EventType.ADD) {
+      if (!data.root) return;
+      addNode(mindmap, data.root);
+    }
+  });
+  eventHandler.addEvent((type, data) => {
+    if (type === EventType.SHOW) {
+      show(data);
+    }
+  });
   return mindmap;
 }
 

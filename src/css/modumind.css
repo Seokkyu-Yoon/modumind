@@ -5,6 +5,10 @@ body {
   top: 0px;
 }
 
+input {
+  display: block;
+  position: absolute;
+}
 node {
   display: flex;
   flex-direction: column;
