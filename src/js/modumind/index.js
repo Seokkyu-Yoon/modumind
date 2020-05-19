@@ -21,7 +21,7 @@ const DEFAULT_OPTIONS = {
 function initFileInput() {
   const fileInput = $c('input');
   fileInput.type = 'file';
-  dom.addEvent(fileInput, 'change', () => {
+  fileInput.addEventListener('change', () => {
     const { files } = fileInput;
     if (files.length > 0) {
       const fileData = files[0];
@@ -58,27 +58,46 @@ class ModuMind {
     this.viewport.appendChild(this.container);
     this.container.appendChild(this.view);
 
+    this.edit = false;
+    this.selectNode = null;
     this.init();
   }
 
   resize() {
-    $d.body.style.margin = '0px';
-    $d.body.style.overflow = 'hidden';
-    $d.body.style.height = `${$w.innerHeight}px`;
-    this.viewport.style.width = `${$d.body.clientWidth}px`;
-    this.viewport.style.height = `${$d.body.clientHeight}px`;
+    clearTimeout(this.draw);
+    this.draw = setTimeout(() => {
+      $d.body.style.height = `${$w.innerHeight}px`;
+      this.viewport.style.width = `${$d.body.clientWidth}px`;
+      this.viewport.style.height = `${$d.body.clientHeight}px`;
+      this.view.draw(this.model);
+    }, 0);
   }
 
   init() {
     $w.addEventListener('resize', this.resize.bind(this));
+    $w.addEventListener('click', (e) => {
+      const element = e.target;
+      const tag = element.tagName.toLowerCase();
+      if (tag === 'expander') {
+        console.log(element);
+        return;
+      }
+      const nodeEl = element.closest('node');
+      if (nodeEl === null) return;
+      nodeEl.focus();
+      console.log(nodeEl);
+    });
+    Object.values(this.model.nodes).forEach((node) => {
+      this.view.addNode(node);
+    });
     this.resize();
-    this.addNode(this.model.root);
   }
 
-  addNode(node) {
-    this.view.addNode(node);
-    node.getChildren().forEach((child) => this.view.addNode(child));
-    this.view.draw(this.model.root);
+  addNode(parentId, node) {
+    const parent = this.model.getNode(parentId);
+    const nodeModel = this.model.addNewChild(parent, node);
+    this.view.addNode(nodeModel);
+    this.resize();
   }
 
   load() {

@@ -2,7 +2,6 @@ import logger from './logger';
 import Direction from './direction';
 import uuid from './uuid';
 import file from './file';
-import dom from './dom';
 
 const $w = window;
 const $d = document;
@@ -43,5 +42,4 @@ export {
   Direction,
   uuid,
   file,
-  dom,
 };

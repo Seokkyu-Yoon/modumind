@@ -12,7 +12,7 @@ const DEFAULT_ROOT = {
   parent: null,
   direction: Direction.CENTER,
   index: 0,
-  expand: { left: true, right: true },
+  expand: { '-1': true, '1': true }, // eslint-disable-line quote-props
   title: 'Root Node',
   body: 'Root Node',
   children: new DefaultChildren(),
@@ -47,6 +47,22 @@ class Root extends Node {
       ...bucket,
       ...child.getChildren(direction),
     ], []);
+  }
+
+  setChildren(obj, direction) {
+    let { children } = this;
+    if (typeof direction !== 'undefined') {
+      children = this.children[direction];
+    } else {
+      children = [
+        ...this.children[Direction.LEFT],
+        ...this.children[Direction.RIGHT],
+      ];
+    }
+    children.forEach((child) => {
+      Object.assign(child, obj);
+      child.getChildren(direction);
+    });
   }
 
   removeChild(node) {

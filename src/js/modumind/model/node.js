@@ -58,7 +58,18 @@ class Node {
   }
 
   getChildren() {
-    return this.children;
+    return this.children.reduce((bucket, child) => [
+      child,
+      ...bucket,
+      ...child.getChildren(),
+    ], []);
+  }
+
+  setChildren(obj) {
+    this.children.forEach((child) => {
+      Object.assign(child, obj);
+      child.setChildren(obj);
+    });
   }
 
   removeChild(node) {

@@ -1,14 +1,39 @@
 body {
   margin: 0;
   overflow: hidden;
+  left: 0px;
+  top: 0px;
 }
 
 node {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: absolute;
   border: darkgray solid 2px;
   border-radius: 5px;
   padding: 5px;
+  justify-content: center;
+}
+node:focus {
+  background-color: gainsboro;
+  outline: none;
+}
+node:hover {
+  background-color: darkgray;
+}
+
+expander {
+  display: flex;
+  position: absolute;
+  border: black solid 1px;
+  border-radius: 5px;
+  width: 10px;
+  height: 10px;
+  padding: 0px;
+  font-size: 12px;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
 }
 
 mindmap {
