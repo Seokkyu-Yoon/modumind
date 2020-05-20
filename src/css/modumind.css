@@ -17,14 +17,17 @@ node {
   border-radius: 5px;
   padding: 5px;
   justify-content: center;
-}
-node:focus {
-  background-color: gainsboro;
-  outline: none;
+  cursor: pointer;
 }
 node:hover {
   background-color: darkgray;
 }
+
+.selected {
+  background-color: gainsboro;
+  outline: none;
+}
+
 
 expander {
   display: flex;
@@ -42,8 +45,8 @@ expander {
 
 mindmap {
   display: block;
-  overflow: visible;
-  background-color: cyan;
+  /* overflow: visible; */
+  cursor: pointer;
 }
 
 #viewport {
@@ -53,5 +56,5 @@ mindmap {
 
 modumind-container{
   display: block;
-  overflow: hidden;
+  /* overflow: visible; */
 }

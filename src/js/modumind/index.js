@@ -1,6 +1,7 @@
 import Panzoom from '@panzoom/panzoom';
 import MindmapModel from './model/mindmap';
 import MindmapView from './view/mindmap';
+import PanzoomPlugin from './plugin/panzoom';
 
 import {
   file,
@@ -69,27 +70,45 @@ class ModuMind {
     this.viewport = $g(this.option.viewport);
     this.container = $c('modumind-container');
     this.container.innerHTML = '';
-
     this.viewport.appendChild(this.container);
     this.container.appendChild(this.view);
+    this.panzoomPlugin = new PanzoomPlugin(this.container, this.viewport);
+    this.panzoomPlugin.attach();
     eventHandler.invokeEvent(EventType.ADD, { root: this.model.root });
 
     this.selectNode = null;
 
+    this.viewport.addEventListener('wheel', (e) => eventHandler.invokeEvent(EventType.WHEEL, e));
     $w.addEventListener('resize', this.resize.bind(this));
-    $w.addEventListener('click', (e) => {
+    $d.addEventListener('click', (e) => {
       const element = e.target;
-      this.selectNode = null;
       const tag = element.tagName.toLowerCase();
       if (tag === 'expander') {
-        logger.log(element);
+        const node = this.model.getNode(element.id);
+        if (node === null) return;
+        const direction = element.getAttribute('direction');
+        node.toggleExpand(direction);
+        eventHandler.invokeEvent(EventType.SHOW, this.model.root);
         return;
       }
       const nodeEl = element.closest('node');
       if (nodeEl === null) return;
-      nodeEl.focus();
+      nodeEl.classList.add('selected');
       this.selectNode = nodeEl;
     });
+    $w.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const element = e.target.closest('node');
+      console.log(element);
+      if (element !== null && element === this.selectNode) {
+        console.log('move node');
+        return;
+      }
+      if (this.selectNode !== null) {
+        this.selectNode.classList.remove('selected');
+        this.selectNode = null;
+      }
+    }, false);
     this.resize();
   }
 

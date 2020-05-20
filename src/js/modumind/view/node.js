@@ -1,6 +1,5 @@
 import {
   $c,
-  $g,
   Direction,
 } from '../util';
 
@@ -8,11 +7,13 @@ function Expander(nodeModel) {
   const EXPANDER_SIZE = 14;
   const leftExpanderEl = $c('expander');
   leftExpanderEl.setAttribute('id', nodeModel.id);
+  leftExpanderEl.setAttribute('direction', Direction.LEFT);
   leftExpanderEl.innerHTML = '+';
   leftExpanderEl.style.left = `${-EXPANDER_SIZE}px`;
 
   const rightExpanderEl = $c('expander');
   rightExpanderEl.setAttribute('id', nodeModel.id);
+  rightExpanderEl.setAttribute('direction', Direction.RIGHT);
   rightExpanderEl.innerHTML = '+';
   rightExpanderEl.style.right = `${-EXPANDER_SIZE}px`;
 
@@ -25,7 +26,6 @@ function Expander(nodeModel) {
 function Node(nodeModel) {
   const nodeEl = $c('node');
   nodeEl.setAttribute('id', nodeModel.id);
-  nodeEl.setAttribute('tabindex', '0');
 
   const titleEl = $c('div');
   titleEl.innerHTML = `<b>${nodeModel.title}</b>`;

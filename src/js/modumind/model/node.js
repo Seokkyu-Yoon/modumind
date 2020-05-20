@@ -105,6 +105,10 @@ class Node {
     return count;
   }
 
+  toggleExpand() {
+    this.expand = !this.expand;
+  }
+
   static isNode(node) {
     return node instanceof Node;
   }

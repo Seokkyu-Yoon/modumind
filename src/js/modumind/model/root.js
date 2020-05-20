@@ -86,6 +86,10 @@ class Root extends Node {
   hasChildren(node) {
     return this.children[node.direction].includes(node);
   }
+
+  toggleExpand(direction) {
+    this.expand[direction] = !this.expand[direction];
+  }
 }
 
 export default Root;

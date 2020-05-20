@@ -10,7 +10,7 @@ const EventType = {
   REMOVE: 7,
   DRAG: 9,
   WHEEL: 10,
-  POPUP: 11,
+  ZOOM: 11,
   VIDEO_LOADED: 12,
   RELOAD: 100, // mindmap is reloaded
 };

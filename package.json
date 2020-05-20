@@ -5,8 +5,7 @@
   "main": "src/js/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.prod.js",
-    "dev": "webpack-dev-server --hot --inline --open --config webpack.config.dev.js",
-    "test": "jest"
+    "dev": "webpack-dev-server --hot --inline --open --config webpack.config.dev.js"
   },
   "keywords": [
     "mindmap"
@@ -26,7 +25,6 @@
     "eslint-plugin-import": "^2.20.2",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
-    "jest": "^26.0.1",
     "style-loader": "^1.2.1",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",

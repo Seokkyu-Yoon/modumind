@@ -12,14 +12,33 @@ const MARGIN = {
   VERTICAL: 100,
 };
 
+function setDisplay(node) {
+  const nodeEl = $g(node.id);
+  if (node.isroot) {
+    Object.assign(node, { visible: true });
+    nodeEl.style.display = 'flex';
+    return;
+  }
+  const { parent } = node;
+  let { expand } = parent;
+  if (parent.isroot) {
+    expand = parent.expand[node.direction];
+  }
+  const visible = expand && parent.visible;
+  nodeEl.style.display = visible ? 'flex' : 'none';
+  Object.assign(node, { visible });
+}
+
 function setHeight(node) {
   const nodeHeight = $g(node.id).offsetHeight;
-  const reducer = (acc, child, index) => (
-    index > 0
+  const reducer = (acc, child, index) => {
+    setDisplay(child);
+    return index > 0
       ? acc + setHeight(child) + MARGIN.HORIZONTAL
-      : acc + setHeight(child)
-  );
+      : acc + setHeight(child);
+  };
   if (node.isroot) {
+    Object.assign(node, { visible: true });
     const childrenHeightLeft = node.children[Direction.LEFT].reduce(reducer, 0);
     const childrenHeightRight = node.children[Direction.RIGHT].reduce(reducer, 0);
 
@@ -36,18 +55,29 @@ function setHeight(node) {
   return height;
 }
 
-function drawChild(node, parent) {
+function getExpanderInfo(children, expand, visible) {
+  const display = children.length && visible ? 'flex' : 'none';
+  const innerHTML = expand ? '+' : '-';
+  return { display, innerHTML };
+}
+
+function showChild(node, parent) {
   const nodeEl = $g(node.id);
   const parentEl = $g(parent.id);
   const { index } = node;
 
   let top = parseFloat(parentEl.style.top) + parentEl.offsetHeight / 2;
-  let { height, children } = parent;
+  let { height, children, expand } = parent;
   if (parent.isroot) {
     height = height[node.direction];
     children = children[node.direction];
+    expand = expand[node.direction];
   }
   top -= height / 2;
+  const visible = expand && parent.visible;
+  nodeEl.style.display = visible ? 'flex' : 'none';
+  Object.assign(node, { visible });
+
   for (let i = 0; i < index; i += 1) {
     top += children[i].height + MARGIN.HORIZONTAL;
   }
@@ -62,16 +92,37 @@ function drawChild(node, parent) {
   nodeEl.style.left = `${left}px`;
   nodeEl.style.top = `${top}px`;
 
-  node.children.forEach((child) => drawChild(child, parent));
+  const expander = nodeEl.querySelector('expander');
+  const expanderInfo = getExpanderInfo(node.children, node.expand, visible);
+  expander.style.display = expanderInfo.display;
+  expander.innerHTML = expanderInfo.innerHTML;
+  node.children.forEach((child) => showChild(child, parent));
 }
 
 function show(root) {
   setHeight(root);
+  const visible = true;
   const rootEl = $g(root.id);
   rootEl.style.left = `${($d.body.offsetWidth - rootEl.offsetWidth) / 2}px`;
   rootEl.style.top = `${($d.body.offsetHeight - rootEl.offsetHeight) / 2}px`;
 
-  root.getChildren().forEach((child) => drawChild(child, root));
+  const [leftExpander, rightExpander] = rootEl.querySelectorAll('expander');
+  const leftExpanderInfo = getExpanderInfo(
+    root.children[Direction.LEFT],
+    root.expand[Direction.LEFT],
+    visible,
+  );
+  const rightExpanderInfo = getExpanderInfo(
+    root.children[Direction.RIGHT],
+    root.expand[Direction.RIGHT],
+    visible,
+  );
+  leftExpander.style.display = leftExpanderInfo.display;
+  leftExpander.innerHTML = leftExpanderInfo.innerHTML;
+  rightExpander.style.display = rightExpanderInfo.display;
+  rightExpander.innerHTML = rightExpanderInfo.innerHTML;
+  Object.assign(root, { visible });
+  root.getChildren().forEach((child) => showChild(child, root));
 }
 
 function addNode(mindmap, node) {
